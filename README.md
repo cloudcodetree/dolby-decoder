@@ -1,8 +1,51 @@
 # dolby-decoder
 
-A DIY hardware build guide for decoding the Dolby family of surround formats — from a
-genuinely home-buildable analog **matrix** decoder up to what's realistically possible with
-**Dolby Digital, TrueHD, and Atmos**.
+A DIY project for decoding the Dolby family of surround formats — in **software** and in
+**hardware**. It ships with:
+
+- ⚡ **A working matrix surround decoder in pure-Python** (`dolbydec/`) you can run right now —
+  it decodes a stereo **Lt/Rt** signal into real **L / C / R / S** channels (or a 5.1 bus),
+  the same sum-and-difference matrix a Dolby Surround / Pro Logic decoder uses. No
+  dependencies, no numpy — just Python 3. See [Quick start](#quick-start-software-decoder).
+- 📐 **A hardware build guide** (`docs/`) for building the analog version from op-amps and a
+  delay chip, plus the realistic path for the digital formats (Dolby Digital / DD+ / TrueHD)
+  and an honest account of where **Atmos** hits a hard wall.
+
+> **Read this first — the honest scope.** "Build a Dolby decoder" spans two very different
+> worlds. One half (the analog *matrix* surround formats) is a rewarding project you can build
+> in **software** (this repo's `dolbydec/`) *or* from op-amps. The other half (the digital,
+> discrete, and object-based formats — Dolby Digital, DD+, TrueHD, **Atmos**) cannot be legally
+> or practically *decoded from scratch* by a hobbyist: the bitstreams are patented and the
+> decoders are licensed. This project is honest about that line. See
+> [What you can and can't build](#what-you-can-and-cant-build).
+
+## Quick start (software decoder)
+
+No install, no dependencies — Python 3.9+:
+
+```bash
+# 1. Make a matrix-encoded test signal (4 tones folded into stereo Lt/Rt)
+python3 -m dolbydec demo -o demo.wav
+
+# 2. Decode it back into 5.1 (FL FR FC LFE SL SR)
+python3 -m dolbydec decode demo.wav -o out_5_1.wav
+
+# 3. ...or split into separate L / C / R / S channel files
+python3 -m dolbydec decode demo.wav --split out/
+
+# Decode any real stereo (or Dolby-Surround-encoded) WAV you have:
+python3 -m dolbydec decode your_stereo.wav -o your_5_1.wav
+```
+
+Run the test suite (pure stdlib, no pytest required):
+
+```bash
+python3 tests/test_decode.py     # or: python3 -m pytest tests/
+```
+
+The decoder achieves ~40 dB of matrix separation on the reference signal — center content
+cancels in the surround channel and vice-versa, exactly as the analog circuit does. How it maps
+to the hardware is documented in [§6 · The software decoder](docs/06-software-decoder.md).
 
 > **Read this first — the honest scope.** "Build a Dolby decoder" spans two very different
 > worlds. One half (the analog *matrix* surround formats) is a rewarding weekend electronics
@@ -42,6 +85,21 @@ run, not build.** This guide covers both honestly.
    cost estimate for the analog build and the digital build.
 6. **[Safety & legal](docs/05-safety-and-legal.md)** — mains safety, patents, HDCP, and what
    "DIY" does and doesn't entitle you to.
+7. **[The software decoder](docs/06-software-decoder.md)** — how the `dolbydec/` code implements
+   the same matrix in Python, module by module, mapped to the analog stages.
+
+## Repository layout
+
+```
+dolbydec/            the software decoder (pure stdlib Python)
+  wavio.py           WAV read/write (16/24/32-bit PCM)
+  dsp.py             biquad filters + delay line (the analog filter/delay stages)
+  decode.py          the L/C/R/S matrix + surround processing chain
+  encode.py          the inverse matrix (to make test material)
+  __main__.py        the `python3 -m dolbydec` CLI
+tests/test_decode.py round-trip + separation tests
+docs/                the hardware build guide (this table of contents)
+```
 
 ## Suggested build order
 
@@ -55,6 +113,12 @@ run, not build.** This guide covers both honestly.
 
 ## Status
 
-Documentation / build guide. No firmware or PCB files yet — schematics are given as
-buildable breadboard/protoboard designs with real part numbers. PCB Gerbers and a Pi decode
-script are natural next steps (see the TODO at the end of each build doc).
+- ✅ **Software matrix decoder** — working and tested (`dolbydec/`, `python3 tests/test_decode.py`).
+- ✅ **Hardware build guide** — complete for the analog matrix decoder and the digital front end.
+- ⬜ **PCB Gerbers** for the analog board — schematics are given as buildable breadboard/protoboard
+  designs with real part numbers; KiCad files are a natural next step.
+- ⬜ **Raspberry Pi decode service** — the FFmpeg command-line path is documented in
+  [§2](docs/02-digital-formats-rpi.md); a packaged `decode.sh` + systemd unit is a TODO.
+
+See the TODO list at the end of each build doc for stretch goals (DSP steering, bass management,
+Pi automation).

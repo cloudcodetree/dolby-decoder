@@ -1,0 +1,13 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.venv/
+venv/
+
+# Generated audio / scratch output
+*.wav
+!tests/fixtures/**/*.wav
+demo_out/
+out/
