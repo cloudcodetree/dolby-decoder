@@ -5,8 +5,8 @@ Read this before you plug anything in. None of it is scary, but two areas — **
 
 ## Electrical safety
 
-The decoder itself is a **low-voltage, signal-level** project (±9–12 V, line-level audio ≈1–2 V).
-That part is safe. The risks come from what you connect it to.
+The decoder itself is a **low-voltage, signal-level** project (a single 9–12 V supply, line-level
+audio ≈1–2 V). That part is safe. The risks come from what you connect it to.
 
 - **Never open a mains-powered amplifier or AVR** to tap signals unless you know what you're
   doing. Line voltage (120/230 V AC) and large filter capacitors inside can injure or kill even
@@ -19,7 +19,7 @@ That part is safe. The risks come from what you connect it to.
     can destroy the amp. Use the **hot (+) terminals** as shown, and if your amp is bridged,
     **skip the passive trick** and use the [active line-level matrix](01-analog-matrix-decoder.md#stage-2--the-active-op-amp-matrix)
     instead.
-- **Power supply:** if you build a mains-fed ±12 V supply rather than using batteries/wall-warts,
+- **Power supply:** if you build a mains-fed supply rather than using a battery/wall-wart,
   treat the primary side with respect — proper fusing, strain relief, insulation, and an earthed
   metal enclosure. If unsure, use a **pre-made wall-wart** and only handle the low-voltage side.
 - **Grounding & hum:** tie all signal grounds to one point (star ground); a metal enclosure

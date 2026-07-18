@@ -13,7 +13,7 @@ its own:
    band-limit + delay + noise reduction on the surround channel, the things that make a bare
    matrix sound like an actual Dolby decoder.
 
-> ⚠️ **Signal-level project.** Everything here runs at **line level** (≈1–2 V) from a ±9–12 V
+> ⚠️ **Signal-level project.** Everything here runs at **line level** (≈1–2 V) from a single 9–12 V
 > supply. You do **not** open a mains-powered amplifier for Stage 1 unless you follow
 > [the safety doc](05-safety-and-legal.md) — the Hafler trick touches speaker terminals, which
 > are safe, but the chassis and mains inside an amp are not.
@@ -94,23 +94,51 @@ anything.
 
 ## Stage 2 · The active op-amp matrix
 
-*(an afternoon · ±9–12 V · four op-amps)*
+*(an afternoon · single 9–12 V supply · four op-amps)*
 
 The passive trick is amp-dependent and has no center channel. The active version takes a
 **line-level Lt/Rt** input (from a preamp, DAC, TV line-out, or the stereo downmix of your
 [Pi digital front end](02-digital-formats-rpi.md)) and produces **four buffered line outputs**
 — L, C, R, S — that you feed to four power-amp channels.
 
-### Power supply
+### Power supply — single supply, no rail splitter
 
-A **dual-rail ±9 V to ±12 V** supply. Easiest options:
+This build runs from **one positive supply** (a single 9 V battery or a 9–12 V wall-wart). No
+dual rails, no rail-splitter IC — instead we make a **virtual ground at half the supply** with a
+plain resistor divider and reference every op-amp to it. This is the standard single-supply
+audio trick and it's cheaper and simpler.
 
-- Two 9 V batteries (one for +9, one for −9, commoned in the middle) — great for a first test,
-  no mains.
-- A wall-wart + a **TLE2426 "rail splitter"** to make a virtual ground from a single supply.
-- A small ±12 V linear supply if you want it permanent.
+**Virtual ground (Vbias = V/2):**
 
-Decouple every op-amp with **100 nF** across its supply pins.
+```
+  V+ ──[ R 10k ]──┬── Vbias  (= V/2, the "signal ground" for the op-amps)
+                  │
+                  ├──[ C 100µF ]── GND   (bulk hold-up)
+                  ├──[ C 100nF ]── GND   (HF bypass)
+                  │
+  GND ─[ R 10k ]──┘
+```
+
+Two 10 kΩ resistors set the midpoint; the caps make it a low-impedance AC ground. For a stiffer
+bias you can buffer Vbias through one spare op-amp section (non-inverting, unity gain), but the
+divider alone is fine at these currents.
+
+Then, throughout the build:
+
+- Every op-amp's **+V pin → V+**, **−V/GND pin → GND** (single supply, e.g. 9 V and 0 V).
+- Every place the schematics say **Vref** or **GND on a non-inverting input → Vbias**.
+- **AC-couple** all inputs and outputs (series cap) so the DC bias stays inside the board and
+  doesn't reach your source or amps.
+
+**Supply options (all single-rail):**
+
+- A single **9 V battery** — great for a first test, no mains.
+- A **9–12 V DC wall-wart** — for permanent use. Add a series diode + 100 µF for reverse/ripple
+  protection.
+- Rail-to-rail op-amps (e.g. **MCP6002**, **TLV2372**) give a little more headroom on a low
+  single supply, but the NE5532/TL072 work fine from 9–12 V.
+
+Decouple every op-amp with **100 nF** across its supply pins, and keep the Vbias net short.
 
 ### Op-amp choice
 
@@ -124,7 +152,16 @@ All resistors **10 kΩ, 1% metal film** unless noted. Non-inverting buffers for 
 inverter for C; a difference amp for S. (Inversions don't matter audibly for the derived
 channels — but keep L and R non-inverted so they stay in phase with the fronts.)
 
+**Single-supply biasing (applies everywhere below):** the two inputs **Lt** and **Rt** each
+arrive through a **10 µF coupling cap** and are held at **Vbias** by a **100 kΩ** resistor to the
+virtual ground. Every op-amp `+` input shown tied to `Vbias` uses that half-supply reference from
+the [power section](#power-supply--single-supply-no-rail-splitter). No node connects to a
+negative rail because there isn't one.
+
 ```
+   (each input: Lt/Rt ──[10µF]──┬──► into matrix
+                                └─[100k]─ Vbias )
+
                  LEFT  buffer (unity gain)
  Lt ──┬──────────►│+\
       │           │  >───────────────► L out
@@ -137,16 +174,16 @@ channels — but keep L and R non-inverted so they stay in phase with the fronts
       │  │    ┌─►│−/
       │  │    └──────────────┘
       │  │
-      │  │      CENTER = −(Lt + Rt)/2 · 2  ... (summing inverter, gain set to ~0.7)
+      │  │      CENTER = −(Lt + Rt)   ... (summing inverter, gain trimmed to ~0.7)
       │  │     Rc                     Rf
  Lt ──┼──┴──[10k]──┐        ┌──[10k]──┐
       │            │        │         │
  Rt ──┴─────[10k]──┼───►│−\ │         │
                    └────┤  >┴─────────┴──► C out
-      Vref(gnd)───►│+/
+        Vbias ─────►│+/
                         (Rf/Rin sets level; 10k/10k → sum then trim, see calibration)
 
-      SURROUND = (Lt − Rt)/2   ... (classic difference amplifier)
+      SURROUND = (Lt − Rt)   ... (classic difference amplifier)
                     R1=10k        R2=10k
  Lt ───────────────[10k]────►│−\
                              │  >───────────► S out (raw)
@@ -154,13 +191,13 @@ channels — but keep L and R non-inverted so they stay in phase with the fronts
              │
             [10k]
              │
-            GND
+           Vbias      (reference the divider to Vbias, not ground)
 ```
 
 **How the difference amp works:** the standard 4-resistor instrumentation-style difference
-amplifier with all resistors equal gives `Vout = Rt_in(+) − Lt_in(−) = Rt − Lt = −(Lt − Rt)`.
-Sign is irrelevant for a mono surround feed. With all four resistors equal (10 kΩ) the gain is
-1; the `0.5` factor is handled in calibration so you don't lose headroom.
+amplifier with all resistors equal gives `Vout = Rt_in(+) − Lt_in(−) = Rt − Lt = −(Lt − Rt)`
+(referenced to Vbias). Sign is irrelevant for a mono surround feed. With all four resistors equal
+(10 kΩ) the gain is 1; the `0.5` factor is handled in calibration so you don't lose headroom.
 
 **Center summing amp:** two 10 kΩ input resistors into a virtual-ground inverter with a 10 kΩ
 (or 7.5 kΩ for the −3 dB Dolby weighting) feedback resistor gives `C = −(Lt + Rt)·(Rf/10k)`.
@@ -283,9 +320,9 @@ See the [consolidated BOM](04-bom-and-tools.md) for a shopping list and cost. Co
 
 - 3× dual op-amp (NE5532 or TL072) — matrix + filters
 - 1× **PT2399** delay IC (+ its support R/C from the datasheet)
-- ~20× 10 kΩ 1% metal-film resistors, assorted filter R/C
+- ~20× 10 kΩ 1% metal-film resistors, assorted filter R/C (incl. 2× 10 kΩ for the Vbias divider)
 - 2–3× 10 kΩ trimpots (null/level calibration)
-- ±9–12 V supply (batteries or wall-wart + TLE2426)
+- Single 9–12 V supply (battery or wall-wart) — virtual ground from a 2× 10 kΩ divider, no rail splitter
 - RCA jacks, protoboard/PCB, enclosure
 
 ## TODO / stretch goals

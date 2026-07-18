@@ -19,7 +19,7 @@ Where you buy matters more than which exact listing you pick:
   buying values individually.
 - **Authoritative/genuine parts** (datasheets, guaranteed-real chips) —
   **[Mouser](https://www.mouser.com)** / **[DigiKey](https://www.digikey.com)**. Worth it for
-  the rail-splitter and any op-amp you're fussy about; overkill for a 10 kΩ resistor.
+  any op-amp you're fussy about; overkill for a 10 kΩ resistor.
 - **Modules & tools** (Pi, DACs, amp boards, meters, irons) — **Amazon** for speed,
   **AliExpress** for ~30–50 % less if you'll wait for shipping.
 - **BBD / boutique audio chips** (MN3005 etc.) — **[Guitar Pedal Parts](https://guitarpedalparts.com)**
@@ -40,8 +40,7 @@ which then cover many future projects. The decoder-specific parts are cheap.
 |---|---|---|---|
 | **NE5532** dual op-amp ×3 | L/R buffers, C sum, S difference, filters | [Tayda](https://www.taydaelectronics.com/ne5532-5532-ic-dual-low-noise-op-amp.html) ~$0.45 ea · [Amazon 20-pk](https://www.amazon.com/NE5532-Low-Noise-High-Speed-Operational-Amplifier/dp/B01EAWJ996) | $1.50 / $9 pk |
 | **PT2399** delay IC ×1 (+ support R/C) | ~20–30 ms surround delay | [Tayda](https://www.taydaelectronics.com/pt2399-2399-echo-audio-processor-guitar-ic.html) · [StompboxParts](https://stompboxparts.com/semiconductors/pt2399-digital-delay-ic/) | ~$1.20 |
-| **TLE2426** rail splitter (single-supply builds) | virtual ground for ±rails | [DigiKey TLE2426CP](https://www.digikey.com/en/products/detail/texas-instruments/TLE2426CP/371936) | ~$2.20 |
-| **10 kΩ 1% metal-film** resistors (+ filter values) | matrix + filters | [Aniann 1280-pc 1% kit](https://www.amazon.com/Resistor-Assorted-Resistors-Assortment-Experiments/dp/B07L851T3V) | ~$13 (kit) |
+| **10 kΩ 1% metal-film** resistors (matrix, filters, + 2× for the Vbias divider) | matrix + filters + virtual ground | [Aniann 1280-pc 1% kit](https://www.amazon.com/Resistor-Assorted-Resistors-Assortment-Experiments/dp/B07L851T3V) | ~$13 (kit) |
 | **Ceramic caps** (100 nF decoupling, 10 nF filter) | supply decoupling, 7 kHz LPF | [BOJACK/2100-pc ceramic kit](https://www.amazon.com/Value-2100-Ceramic-Capacitor-Assortment/dp/B019G8GJ24) | ~$13 (kit) |
 | **Electrolytic caps** (10 µF DC-block, 1.6 µF) | I/O coupling, 100 Hz HPF | [electrolytic assortment kit](https://www.amazon.com/electrolytic-capacitor-assortment-kit/s?k=electrolytic+capacitor+assortment+kit) | ~$14 (kit) |
 | **10 kΩ trimpots** ×3 | null & level calibration | [Amazon 10k trimpot pack](https://www.amazon.com/s?k=10k+trimmer+potentiometer+3296) · Tayda ~$0.30 ea | ~$8 (pk) |
@@ -51,13 +50,16 @@ which then cover many future projects. The decoder-specific parts are cheap.
 
 **Analog core subtotal: ~$35–55** (most of it the reusable resistor/cap kits).
 
-### Power
+### Power — single supply (no rail splitter)
+
+This build runs from **one positive supply**; the virtual ground is a **2×10 kΩ divider**
+(from the resistor kit above) — there's no TLE2426 or dual-rail supply to buy.
 
 | Option | Parts | Source | ~Price |
 |---|---|---|---|
-| Batteries (first test) | 2× 9 V + clips | [9V battery clip pack](https://www.amazon.com/s?k=9v+battery+clip+connector) | ~$6 |
-| Wall-wart + rail splitter | 12 V DC adapter + TLE2426 | [12V DC adapter](https://www.amazon.com/s?k=12v+2a+dc+power+adapter+5.5mm) + DigiKey TLE2426 | ~$10 |
-| Linear ±12 V (permanent) | dual-rail supply module | [±12V linear PSU module](https://www.amazon.com/s?k=dual+rail+%C2%B112v+linear+power+supply) | $15–30 |
+| Single 9 V battery (first test) | 9 V + clip | [9V battery clip pack](https://www.amazon.com/s?k=9v+battery+clip+connector) | ~$4 |
+| 9–12 V DC wall-wart (permanent) | single-rail adapter + input diode/cap | [9–12V DC adapter](https://www.amazon.com/s?k=12v+2a+dc+power+adapter+5.5mm) | ~$8 |
+| Virtual ground | 2× 10 kΩ + 100 µF + 100 nF | *(from the resistor & cap kits above)* | ~$0 |
 
 ### Optional / stretch
 
@@ -141,7 +143,6 @@ already have, so you can build and hear the matrix *before* buying a single comp
 
 - Tayda Electronics — [PT2399](https://www.taydaelectronics.com/pt2399-2399-echo-audio-processor-guitar-ic.html),
   [NE5532](https://www.taydaelectronics.com/ne5532-5532-ic-dual-low-noise-op-amp.html)
-- DigiKey — [TLE2426CP rail splitter](https://www.digikey.com/en/products/detail/texas-instruments/TLE2426CP/371936)
 - Raspberry Pi — [Pi 5 product page](https://www.raspberrypi.com/products/raspberry-pi-5/),
   [2026 price-rise news](https://www.raspberrypi.com/news/more-memory-driven-price-rises/)
 - PJRC — [Teensy 4.0](https://www.pjrc.com/store/teensy40.html) & [Audio Adapter](https://www.pjrc.com/store/teensy3_audio.html)
