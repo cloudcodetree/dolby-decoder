@@ -148,6 +148,12 @@ or **OPA2134** (audiophile). You need **4 op-amp sections = 2 dual packages** fo
 
 ### Core matrix schematic
 
+> 📐 **Full sheet:** a complete, color-coded signal-flow schematic — including the **input
+> resources** (stereo source + RCA jacks) and **output resources** (amp channels + speakers) —
+> is in **[`schematic.svg`](schematic.svg)**. The ASCII below is the same matrix in text form.
+>
+> ![DIY Dolby Surround matrix decoder schematic](schematic.svg)
+
 All resistors **10 kΩ, 1% metal film** unless noted. Non-inverting buffers for L/R; a summing
 inverter for C; a difference amp for S. (Inversions don't matter audibly for the derived
 channels — but keep L and R non-inverted so they stay in phase with the fronts.)

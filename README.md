@@ -99,7 +99,18 @@ dolbydec/            the software decoder (pure stdlib Python)
   __main__.py        the `python3 -m dolbydec` CLI
 tests/test_decode.py round-trip + separation tests
 docs/                the hardware build guide (this table of contents)
+docs/schematic.svg   full color-coded signal-flow schematic (input → matrix → output)
 ```
+
+## Schematic
+
+The full analog decoder as a single-supply signal-flow schematic — stereo **Lt/Rt** in through
+the matrix and surround chain, out to the amp channels and speakers, with the input and output
+resources drawn in:
+
+![DIY Dolby Surround matrix decoder schematic](docs/schematic.svg)
+
+Details, part values, and calibration are in [§1 · The analog matrix decoder](docs/01-analog-matrix-decoder.md).
 
 ## Suggested build order
 
